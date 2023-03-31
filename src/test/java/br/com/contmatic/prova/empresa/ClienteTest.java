@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
+import nl.jqno.equalsverifier.EqualsVerifier;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class ClienteTest {
@@ -69,7 +71,6 @@ public class ClienteTest {
     @DisplayName("😀 Teste de Cliente válido")
     void deve_aceitar_um_cliente_valido() {
         Set<String> erros = getErros(cliente);
-        System.out.println(erros);
         assertThat(erros.size(), is(0));
     }
 
@@ -104,8 +105,10 @@ public class ClienteTest {
     @Test
     @DisplayName("😢 Teste de CPF nulo")
     void nao_deve_aceitar_um_cpf_nulo() {
-        cliente.setCpf(null);
-        assertThat(getErros(cliente), hasItem(CPF_MENSAGEM_NULO));
+        NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
+            cliente.setCpf(null);
+        });
+        assertEquals("cpf is marked non-null but is null", thrown.getMessage());
     }
 
     @Test
@@ -242,6 +245,14 @@ public class ClienteTest {
     }
 
     @Test
+    @DisplayName("😀 Teste de Equals")
+    void deve_verificar_a_implementacao_do_equals_com_sucesso() {
+        EqualsVerifier.simple().forClass(Cliente.class)
+        .withOnlyTheseFields("cpf")
+        .verify();
+    }
+    
+    @Test
     @DisplayName("😀 Teste de Objetos iguais")
     void deve_retornar_true_no_equals_quando_dois_objetos_forem_iguais() {
         Cliente cliente1 = new Cliente("49523197843");
@@ -299,6 +310,6 @@ public class ClienteTest {
         cliente1.setEmail(email);
         assertTrue(cliente1.toString().contains(cpf));
         assertTrue(cliente1.toString().contains(nome));
-        assertTrue(cliente1.toString().contains(email));
+        assertTrue(cliente1.toString().contains(email));        
     }
 }

@@ -19,7 +19,6 @@ import static br.com.contmatic.prova.constantes.FuncionarioConstante.DATA_NASCIM
 import static br.com.contmatic.prova.constantes.FuncionarioConstante.MATRICULA_MENSAGEM_CARACTERE_ESPECIAL;
 import static br.com.contmatic.prova.constantes.FuncionarioConstante.MATRICULA_MENSAGEM_ESPACO;
 import static br.com.contmatic.prova.constantes.FuncionarioConstante.MATRICULA_MENSAGEM_LETRAS;
-import static br.com.contmatic.prova.constantes.FuncionarioConstante.MATRICULA_MENSAGEM_NULO;
 import static br.com.contmatic.prova.constantes.FuncionarioConstante.MATRICULA_MENSAGEM_TAMANHO;
 import static br.com.contmatic.prova.constantes.FuncionarioConstante.MATRICULA_MENSAGEM_VAZIO;
 import static br.com.contmatic.prova.constantes.FuncionarioConstante.NOME_MENSAGEM_CARACTERE_ESPECIAL;
@@ -43,12 +42,13 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.Set;
 
-import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -60,6 +60,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
+import nl.jqno.equalsverifier.EqualsVerifier;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class FuncionarioTest {
@@ -111,8 +112,10 @@ public class FuncionarioTest {
 	@Test
 	@DisplayName("😢 Teste de Matrícula nula")
 	void nao_deve_aceitar_uma_matricula_nula() {
-		funcionario.setMatricula(null);
-	      assertThat(getErros(funcionario), hasItem(MATRICULA_MENSAGEM_NULO));   
+        NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
+            funcionario.setMatricula(null);
+        });
+        assertEquals("matricula is marked non-null but is null", thrown.getMessage());
 	}
 	
 	@Test
@@ -364,7 +367,7 @@ public class FuncionarioTest {
 	@Test
 	@DisplayName("😢 Teste de Data de Nascimento mínima")
 	void nao_deve_aceitar_um_funcionario_menor_de_idade() {
-	    DateTime data = new DateTime(2005, 12, 25, 0, 0, 0, 0);
+	    LocalDate data = new LocalDate(2005, 12, 25);
 		funcionario.setDataNascimento(data);
 		assertThat(getErros(funcionario), hasItem(DATA_NASCIMENTO_MENSAGEM));
 	}
@@ -372,7 +375,7 @@ public class FuncionarioTest {
 	@Test
 	@DisplayName("😢 Teste de Data de Nascimento máxima")
 	void nao_deve_aceitar_um_funcionario_com_mais_de_70_anos() {
-	    DateTime data = new DateTime(1951, 12, 25, 0, 0, 0, 0);
+	    LocalDate data = new LocalDate(1951, 12, 25);
 	    funcionario.setDataNascimento(data);
 	    assertThat(getErros(funcionario), hasItem(DATA_NASCIMENTO_MENSAGEM));
 	}
@@ -406,6 +409,14 @@ public class FuncionarioTest {
 		funcionario.setAtivo(null);
 		assertThat(getErros(funcionario), hasItem(ATIVO_FUNCIONARIO_MENSAGEM_NULO));
 	}
+	
+    @Test
+    @DisplayName("😀 Teste de Equals")
+    void deve_verificar_a_implementacao_do_equals_com_sucesso() {
+        EqualsVerifier.simple().forClass(Funcionario.class)
+        .withOnlyTheseFields("matricula")
+        .verify();
+    }
 	
 	@Test
 	@DisplayName("😀 Teste de Objetos iguais")
@@ -461,7 +472,7 @@ public class FuncionarioTest {
 		final String nome = "Manuela";
 		final String cargo = "Estagiário";
 		final String setor = "Tecnologia";  
-		final DateTime dataNascimento =  new DateTime(2003, 7, 5, 0, 0, 0, 0);      
+		final LocalDate dataNascimento =  new LocalDate(2003, 7, 5);      
 		final BigDecimal salario = new BigDecimal(2500);
 		final Boolean ativo = true;
 		Funcionario funcionario1 = new Funcionario(matricula);
